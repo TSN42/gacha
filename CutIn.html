@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スプーキー“Boo!”パレード 10連ガチャ</title>
+  <!-- Halloween風フォント -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Creepster&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <style>
+    :root {
+      --primary-color: #ff7f00;  /* ハロウィンオレンジ */
+      --secondary-color: #8a2be2; /* バイオレット */
+      --text-color-light: #fff;
+      --text-color-dark: #333;
+      --border-color: #666;
+      --border-radius: 10px;
+      --box-shadow-sr: 0 0 15px rgba(138, 43, 226, 0.8);
+      --box-shadow-ssr: 0 0 20px rgba(255, 215, 0, 1);
+      --spooky-font: 'Creepster', cursive;
+      --background-color: #1a1a1a;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: var(--background-color);
+      color: var(--text-color-light);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ヘッダー */
+    header {
+      text-align: center;
+      padding: 30px 10px 20px;
+    }
+
+    header h1 {
+      font-family: var(--spooky-font);
+      font-size: 3em;
+      margin: 0;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    }
+
+    /* メインボタン周り */
+    .button-area {
+      text-align: center;
+      margin: 20px auto 0;
+    }
+
+    button {
+      font-family: var(--spooky-font);
+      font-size: 2em;
+      padding: 15px 40px;
+      background-color: var(--primary-color);
+      color: var(--text-color-light);
+      border: 2px solid var(--secondary-color);
+      border-radius: var(--border-radius);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      cursor: pointer;
+      transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    button:hover {
+      transform: scale(1.04);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    button:disabled {
+      background-color: #666;
+      border-color: #888;
+      color: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* ガチャコンテナ */
+    main {
+      flex: 1;
+      width: 90%;
+      max-width: 1200px;
+      margin: 30px auto;
+      position: relative; /* カットイン用 */
+    }
+
+    .gacha-container {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr); /* 5列に固定 */
+      gap: 20px;
+    }
+
+    /* ガチャカード */
+    .gacha-item {
+      background-color: rgba(0, 0, 0, 0.7);
+      border: 2px solid var(--border-color);
+      border-radius: var(--border-radius);
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease-in-out;
+      position: relative; /* カットイン用 */
+      z-index: 1; /* カットインより下 */
+    }
+
+    .gacha-item:hover {
+      transform: translateY(-2px);
+    }
+
+    .gacha-item img {
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+      animation: fadeIn 0.7s ease-out;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* レアリティごとのスタイル */
+    .rarity-R {
+      border-color: #999;
+    }
+
+    .rarity-SR {
+      border-color: var(--secondary-color);
+      box-shadow: var(--box-shadow-sr);
+    }
+
+    .rarity-SSR {
+      border-color: gold;
+      box-shadow: var(--box-shadow-ssr);
+      /* SSR特有のスタイル */
+    }
+
+    .rarity-SSR img {
+      animation: fadeIn 0.7s ease-out;
+    }
+
+    /* レアリティ説明 */
+    .rarity-info {
+      font-family: var(--spooky-font);
+      margin-top: 20px;
+      text-align: center;
+      font-size: 1.2em;
+      color: var(--text-color-light);
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    }
+
+    /* モーダル */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      overflow: auto;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background-color: #333;
+      border-radius: var(--border-radius);
+      padding: 20px;
+      max-width: 90%;
+      text-align: center;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.8);
+      position: relative;
+    }
+
+    .modal-content img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto 15px;
+      border-radius: var(--border-radius);
+    }
+
+    .close-button {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      color: #f1f1f1;
+      font-size: 40px;
+      font-weight: bold;
+      transition: color 0.3s;
+      cursor: pointer;
+    }
+
+    .close-button:hover,
+    .close-button:focus {
+      color: #bbb;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.9em;
+      color: #ccc;
+    }
+
+    .preload-container {
+      display: none;
+    }
+
+    /* SSRカットイン演出 */
+    .cut-in {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      opacity: 0;
+    }
+
+    .cut-in.active {
+      opacity: 1;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    .cut-in-content {
+      text-align: center;
+    }
+
+    .cut-in-image {
+      max-width: 50%;
+      height: auto;
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(0.9); }
+      to { transform: scale(1.1); }
+    }
+
+    .cut-in-text {
+      font-family: var(--spooky-font);
+      font-size: 4em;
+      color: gold;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+      animation: fadeIn 1s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <!-- ヘッダー -->
+  <header>
+    <h1>スプーキー“Boo!”パレード 10連ガチャ</h1>
+  </header>
+
+  <!-- メインボタン -->
+  <div class="button-area">
+    <button id="pullButton">10連ガチャを引く</button>
+  </div>
+
+  <!-- メインコンテンツ -->
+  <main>
+    <div class="gacha-container" id="gachaContainer"></div>
+    <p class="rarity-info">SSR 5% / SR 20% / R 75%</p>
+    <div class="cut-in" id="cutIn">
+      <div class="cut-in-content">
+        <img id="cutInImage" src="" alt="SSRキャラクター" class="cut-in-image">
+        <p id="cutInText" class="cut-in-text"></p>
+      </div>
+    </div>
+  </main>
+
+  <!-- モーダル -->
+  <div id="imageModal" class="modal">
+    <div class="modal-content">
+      <span class="close-button" onclick="closeModal()">×</span>
+      <img id="modalImage" src="" alt="拡大画像">
+    </div>
+  </div>
+
+  <!-- フッター (任意) -->
+
+  <script>
+    const soundUrls = {
+      'R': './sound/R.mp3',
+      'SR': './sound/SR.mp3',
+      'SSR': './sound/SSR.mp3'
+    };
+    const baseUrl = "./images"; // GitHub Pages 上の images フォルダを参照
+    const gachaItemCount = 10;
+
+    // キャラクターリスト（仮）
+    const characterList = {
+      'R': ['ヒューイ', 'デューイ'],
+      'SR': ['プルート', 'ホーレス', 'ミニー'],
+      'SSR': ['グーフィー']
+    };
+
+    // 画像リストを定義
+    const imageList = {
+      'R': characterList.R.map(name => `${baseUrl}/R/${name}.png`),
+      'SR': characterList.SR.map(name => `${baseUrl}/SR/${name}.png`),
+      'SSR': characterList.SSR.map(name => `${baseUrl}/SSR/${name}.png`)
+    };
+
+    const container = document.getElementById('gachaContainer');
+    const pullButton = document.getElementById('pullButton');
+    const modal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const cutIn = document.getElementById('cutIn');
+    const cutInImage = document.getElementById('cutInImage');
+    const cutInText = document.getElementById('cutInText');
+
+    // 初期表示用の箱を作成
+    const initialItems = Array.from({ length: gachaItemCount }, (_, i) => `
+      <div class="gacha-item" id="item${i}"></div>
+    `).join('');
+    container.innerHTML = initialItems;
+
+    // 画像をプリロード
+    const preloadImages = () => {
+      for (const rarity in imageList) {
+        imageList[rarity].forEach(imagePath => {
+          const img = new Image();
+          img.src = imagePath;
+        });
+      }
+    };
+
+    // 音声をプリロード
+    const preloadSounds = () => {
+      for (const rarity in soundUrls) {
+        new Audio(soundUrls[rarity]);
+      }
+    };
+
+    window.addEventListener('load', () => {
+      preloadImages();
+      preloadSounds();
+    });
+
+    // ガチャボタンを押した時の処理
+    const pullGacha = async () => {
+      pullButton.disabled = true;
+      container.innerHTML = initialItems; // コンテナリセット
+
+      // 10個のガチャ結果を1つずつ表示
+      for (let i = 0; i < gachaItemCount; i++) {
+        await new Promise(resolve => setTimeout(resolve, 600));
+        await showResult(i);
+      }
+
+      pullButton.disabled = false;
+    };
+
+    // 1つのガチャカードを生成
+    const showResult = async (index) => {
+      const rarity = getRandomRarity();
+      const characterName = getRandomCharacterName(rarity);
+      const imagePath = `${baseUrl}/${rarity}/${rarity}${characterName}.png`;
+      const element = document.getElementById(`item${index}`);
+
+      element.className = `gacha-item rarity-${rarity}`;
+      element.innerHTML = `
+        <img src="${imagePath}" alt="${rarity} ${characterName}" onclick="openModal('${imagePath}')">
+      `;
+      playSound(rarity);
+
+      // SSRの場合、カットイン演出
+      if (rarity === 'SSR') {
+        await showCutIn(characterName, imagePath);
+        // カットイン後、少し遅れてカードを表示
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    };
+
+    // カットイン演出
+    const showCutIn = async (characterName, imagePath) => {
+      cutInImage.src = imagePath;
+      cutInText.textContent = `SSR ${characterName} 降臨！`;
+      cutIn.classList.add('active');
+      playSound('SSR'); // カットインと同時に特別なサウンドを再生
+      await new Promise(resolve => setTimeout(resolve, 2000)); // カットイン表示時間
+      cutIn.classList.remove('active');
+    };
+
+    // レアリティをランダムで取得
+    const getRandomRarity = () => {
+      const rand = Math.random() * 100;
+      if (rand < 5) return 'SSR';
+      if (rand < 25) return 'SR';
+      return 'R';
+    };
+
+    // レアリティに応じたキャラクター名をランダムで取得
+    const getRandomCharacterName = (rarity) => {
+      const characters = characterList[rarity];
+      const randomIndex = Math.floor(Math.random() * characters.length);
+      return characters[randomIndex];
+    };
+
+    // 音声再生
+    const playSound = (rarity) => {
+      const audio = new Audio(soundUrls[rarity]);
+      audio.play();
+    };
+
+    // モーダル表示
+    const openModal = (imageSrc) => {
+      modalImage.src = imageSrc;
+      modal.style.display = 'flex';
+    };
+
+    // モーダル閉じる
+    const closeModal = () => {
+      modal.style.display = 'none';
+    };
+
+    pullButton.addEventListener('click', pullGacha);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+</body>
+</html>
