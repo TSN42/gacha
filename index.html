@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTMLファイルへのリンク</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        .button-container {
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>他のHTMLファイルへのリンク</h1>
+    <p>以下のボタンをクリックすると、同じディレクトリにある別のHTMLファイルに移動します。</p>
+
+    <div class="button-container">
+        <button onclick="location.href='Simple.html'">シンプル</button>
+        <p>シンプルなバージョンです。演出とデザイン以外に画像のロードを高速化しています。</p>
+    </div>
+
+    <div class="button-container">
+        <button onclick="location.href='CutIn.html'">カットイン演出</button>
+        <p>シンプルverに加えて簡単にカットイン演出を付けてます。</p>
+    </div>
+
+    <div class="button-container">
+        <button onclick="location.href='back.html'">カード裏面</button>
+        <p>シンプルverに加えカード裏面を用意しています。</p>
+    </div>
+
+</body>
+</html>
