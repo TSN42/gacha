@@ -103,6 +103,7 @@
       transition: transform 0.3s ease-in-out;
       position: relative; /* カットイン用 */
       z-index: 1; /* カットインより下 */
+      cursor: pointer; /* カーソルをポインターに */
     }
 
     .gacha-item:hover {
@@ -114,7 +115,12 @@
       height: auto;
       object-fit: cover;
       animation: fadeIn 0.7s ease-out;
-      cursor: pointer;
+      display: block; /* インライン要素による余白をなくす */
+    }
+
+    .gacha-item img.error {
+      object-fit: contain; /* エラー時は全体を表示 */
+      background-color: #ccc; /* エラー時の背景色 */
     }
 
     @keyframes fadeIn {
@@ -223,13 +229,15 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 10;
+      z-index: 100; /* モーダルより下に調整 */
       opacity: 0;
+      pointer-events: none; /* カットイン中はクリック不可 */
     }
 
     .cut-in.active {
       opacity: 1;
       transition: opacity 0.5s ease-in-out;
+      pointer-events: auto; /* カットイン表示中はクリック可能に（必要に応じて） */
     }
 
     .cut-in-content {
@@ -298,18 +306,20 @@
     const baseUrl = "./images"; // GitHub Pages 上の images フォルダを参照
     const gachaItemCount = 10;
 
-    // キャラクターリスト（仮）
+    // キャラクターリスト（画像パスをデータに含める）
     const characterList = {
-      'R': ['ヒューイ', 'デューイ'],
-      'SR': ['プルート', 'ホーレス', 'ミニー'],
-      'SSR': ['グーフィー']
-    };
-
-    // 画像リストを定義
-    const imageList = {
-      'R': characterList.R.map(name => `${baseUrl}/R/${name}.png`),
-      'SR': characterList.SR.map(name => `${baseUrl}/SR/${name}.png`),
-      'SSR': characterList.SSR.map(name => `${baseUrl}/SSR/${name}.png`)
+      'R': [
+        { name: 'ヒューイ', image: `${baseUrl}/R/Rヒューイ.png` },
+        { name: 'デューイ', image: `${baseUrl}/R/Rデューイ.png` }
+      ],
+      'SR': [
+        { name: 'プルート', image: `${baseUrl}/SR/SRプルート.png` },
+        { name: 'ホーレス', image: `${baseUrl}/SR/SRホーレス.png` },
+        { name: 'ミニー', image: `${baseUrl}/SR/SRミニー.png` }
+      ],
+      'SSR': [
+        { name: 'グーフィー', image: `${baseUrl}/SSR/SSRグーフィー.png` }
+      ]
     };
 
     const container = document.getElementById('gachaContainer');
@@ -328,10 +338,10 @@
 
     // 画像をプリロード
     const preloadImages = () => {
-      for (const rarity in imageList) {
-        imageList[rarity].forEach(imagePath => {
+      for (const rarity in characterList) {
+        characterList[rarity].forEach(character => {
           const img = new Image();
-          img.src = imagePath;
+          img.src = character.image;
         });
       }
     };
@@ -365,19 +375,18 @@
     // 1つのガチャカードを生成
     const showResult = async (index) => {
       const rarity = getRandomRarity();
-      const characterName = getRandomCharacterName(rarity);
-      const imagePath = `${baseUrl}/${rarity}/${rarity}${characterName}.png`;
+      const character = getRandomCharacter(rarity);
       const element = document.getElementById(`item${index}`);
 
       element.className = `gacha-item rarity-${rarity}`;
       element.innerHTML = `
-        <img src="${imagePath}" alt="${rarity} ${characterName}" onclick="openModal('${imagePath}')">
+        <img src="${character.image}" alt="${rarity} ${character.name}" onclick="openModal('${character.image}')" onerror="this.onerror=null; this.src='./images/placeholder.png';" >
       `;
       playSound(rarity);
 
       // SSRの場合、カットイン演出
       if (rarity === 'SSR') {
-        await showCutIn(characterName, imagePath);
+        await showCutIn(character.name, character.image);
         // カットイン後、少し遅れてカードを表示
         await new Promise(resolve => setTimeout(resolve, 500));
       }
@@ -401,8 +410,8 @@
       return 'R';
     };
 
-    // レアリティに応じたキャラクター名をランダムで取得
-    const getRandomCharacterName = (rarity) => {
+    // レアリティに応じたキャラクターをランダムで取得
+    const getRandomCharacter = (rarity) => {
       const characters = characterList[rarity];
       const randomIndex = Math.floor(Math.random() * characters.length);
       return characters[randomIndex];
