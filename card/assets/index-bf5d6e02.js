@@ -1,3 +1,4 @@
+
 document.addEventListener('DOMContentLoaded', () => {
     const card = document.querySelector('.card');
     const cardEffects = card.querySelector('.card__effects');
@@ -43,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const handleDeviceOrientation = (event) => {
+        console.log('deviceorientation event fired');
         const beta = event.beta;
         const gamma = event.gamma;
 
@@ -50,18 +52,20 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const maxTilt = 40;
+        const maxTilt = 30;
         const normalizedBeta = Math.max(-maxTilt, Math.min(maxTilt, beta));
         const normalizedGamma = Math.max(-maxTilt, Math.min(maxTilt, gamma));
 
-        const rotateX = normalizedBeta / maxTilt * 10;
-        const rotateY = normalizedGamma / maxTilt * 10;
+        // カードの回転はここでは行わない
 
         const cardRect = card.getBoundingClientRect();
+        // ホログラムの位置を傾きに基づいて計算
         const mappedMouseX = cardRect.width / 2 + (normalizedGamma / maxTilt) * (cardRect.width / 2);
         const mappedMouseY = cardRect.height / 2 - (normalizedBeta / maxTilt) * (cardRect.height / 2);
 
-        updateCardTransform(rotateX, rotateY, mappedMouseX, mappedMouseY, cardRect);
+        cardEffects.style.setProperty('--pointer-x', `${mappedMouseX / cardRect.width * 100}%`);
+        cardEffects.style.setProperty('--pointer-y', `${mappedMouseY / cardRect.height * 100}%`);
+        cardEffects.style.setProperty('--opacity', '1');
 
         // デバッグ情報を出力
         debugOutput.innerHTML = `
@@ -69,8 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
             <div>Gamma: ${gamma ? gamma.toFixed(2) : 'null'}</div>
             <div>Normalized Beta: ${normalizedBeta.toFixed(2)}</div>
             <div>Normalized Gamma: ${normalizedGamma.toFixed(2)}</div>
-            <div>Rotate X: ${rotateX.toFixed(2)}</div>
-            <div>Rotate Y: ${rotateY.toFixed(2)}</div>
             <div>Mapped Mouse X: ${mappedMouseX.toFixed(2)}</div>
             <div>Mapped Mouse Y: ${mappedMouseY.toFixed(2)}</div>
         `;
