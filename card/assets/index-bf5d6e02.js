@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const maxTilt = 15;
+        const maxTilt = 40;
         const normalizedBeta = Math.max(-maxTilt, Math.min(maxTilt, beta));
         const normalizedGamma = Math.max(-maxTilt, Math.min(maxTilt, gamma));
 
